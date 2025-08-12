@@ -153,7 +153,7 @@ export default function KubexmTerminalsPage() {
                                     <TableCell sx={{ fontWeight: 'bold' }}>IP地址</TableCell>
                                     <TableCell sx={{ fontWeight: 'bold' }}>操作系统</TableCell>
                                     <TableCell sx={{ fontWeight: 'bold' }}>Kubelet版本</TableCell>
-                                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>Actions</TableCell>
+                                    <TableCell align="right" sx={{ fontWeight: 'bold' }}></TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
