@@ -173,7 +173,7 @@ export default function KubexmTerminalsPage() {
                                                     disabled={!nodeIP}
                                                     onClick={() => openUrlInNewTab(nodeShellUrl)}
                                                 >
-                                                    Node Shell
+                                                    节点Shell
                                                 </Button>
                                             </TableCell>
                                         </TableRow>
