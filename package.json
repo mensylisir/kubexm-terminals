@@ -1,5 +1,5 @@
 {
-  "name": "kubexm控制台",
+  "name": "kubexm-terminals",
   "version": "0.0.7",
   "description": "kubexm控制台作为headlamp插件提供",
   "scripts": {

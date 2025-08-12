@@ -37,7 +37,7 @@ export default function KubexmTerminalsPage() {
     const [setupError, setSetupError] = React.useState<string | null>(null);
     const [nodes, setNodes] = React.useState<K8sNode[] | null>(null);
     const [isLoadingNodes, setIsLoadingNodes] = React.useState(true);
-    const [terminalImage, setTerminalImage] = React.useState('registry.dev.rdev.tech:18093/headlamp/super-netshoot:2.0');
+    const [terminalImage, setTerminalImage] = React.useState('registry.dev.rdev.tech:18093/headlamp/universal-toolkit:1.0');
 
     const checkResources = React.useCallback(async () => {
         setIsChecking(true);
