@@ -1,7 +1,7 @@
 import { ApiProxy, K8s } from '@kinvolk/headlamp-plugin/lib';
 import {
     Alert, Box, Button, CircularProgress, Paper, Table, TableBody, TableCell,
-    TableContainer, TableHead, TableRow, TextField, Typography
+    TableContainer, TableHead, TableRow, TextField, Typography, TablePagination
 } from '@mui/material';
 import React from 'react';
 import {
@@ -38,6 +38,9 @@ export default function KubexmTerminalsPage() {
     const [nodes, setNodes] = React.useState<K8sNode[] | null>(null);
     const [isLoadingNodes, setIsLoadingNodes] = React.useState(true);
     const [terminalImage, setTerminalImage] = React.useState('registry.dev.rdev.tech:18093/headlamp/universal-toolkit:1.0');
+
+    const [page, setPage] = React.useState(0);
+    const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
     const checkResources = React.useCallback(async () => {
         setIsChecking(true);
@@ -93,6 +96,15 @@ export default function KubexmTerminalsPage() {
         }
     };
 
+    const handleChangePage = (event: unknown, newPage: number) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+
     if (isChecking && areResourcesReady === null) {
         return <Paper sx={{p:2, m: 2}}><CircularProgress /> <Typography sx={{ml: 2, display: 'inline-block', verticalAlign: 'middle'}}>正在检查终端环境...</Typography></Paper>;
     }
@@ -145,43 +157,58 @@ export default function KubexmTerminalsPage() {
             <Box>
                 <Typography variant="h6" gutterBottom>节点控制台(root shell)</Typography>
                 {isLoadingNodes ? <CircularProgress /> : (
-                    <TableContainer component={Paper} variant="outlined">
-                        <Table stickyHeader>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell sx={{ fontWeight: 'bold' }}>节点名称</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold' }}>IP地址</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold' }}>操作系统</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold' }}>Kubelet版本</TableCell>
-                                    <TableCell align="right" sx={{ fontWeight: 'bold' }}></TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {nodes?.map(node => {
-                                    const nodeIP = getNodeIP(node);
-                                    const nodeShellUrl = nodeIP ? `http://${nodeIP}:${NODE_SHELL_PORT}` : '';
-                                    return (
-                                        <TableRow key={node.metadata?.uid} hover>
-                                            <TableCell>{node.metadata?.name}</TableCell>
-                                            <TableCell>{nodeIP || 'Not Found'}</TableCell>
-                                            <TableCell>{node.status?.nodeInfo?.osImage}</TableCell>
-                                            <TableCell>{node.status?.nodeInfo?.kubeletVersion}</TableCell>
-                                            <TableCell align="right">
-                                                <Button
-                                                    variant="outlined"
-                                                    size="small"
-                                                    disabled={!nodeIP}
-                                                    onClick={() => openUrlInNewTab(nodeShellUrl)}
-                                                >
-                                                    控制台
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    );
-                                })}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                    <Paper component={Paper} variant="outlined">
+                        <TableContainer>
+                            <Table stickyHeader>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell sx={{ fontWeight: 'bold' }}>节点名称</TableCell>
+                                        <TableCell sx={{ fontWeight: 'bold' }}>IP地址</TableCell>
+                                        <TableCell sx={{ fontWeight: 'bold' }}>操作系统</TableCell>
+                                        <TableCell sx={{ fontWeight: 'bold' }}>Kubelet版本</TableCell>
+                                        <TableCell align="right" sx={{ fontWeight: 'bold' }}></TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {nodes
+                                        ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                        .map(node => {
+                                            const nodeIP = getNodeIP(node);
+                                            const nodeShellUrl = nodeIP ? `http://${nodeIP}:${NODE_SHELL_PORT}` : '';
+                                            return (
+                                                <TableRow key={node.metadata?.uid} hover>
+                                                    <TableCell>{node.metadata?.name}</TableCell>
+                                                    <TableCell>{nodeIP || 'Not Found'}</TableCell>
+                                                    <TableCell>{node.status?.nodeInfo?.osImage}</TableCell>
+                                                    <TableCell>{node.status?.nodeInfo?.kubeletVersion}</TableCell>
+                                                    <TableCell align="right">
+                                                        <Button
+                                                            variant="outlined"
+                                                            size="small"
+                                                            disabled={!nodeIP}
+                                                            onClick={() => openUrlInNewTab(nodeShellUrl)}
+                                                        >
+                                                            控制台
+                                                        </Button>
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                        <TablePagination
+                            rowsPerPageOptions={[5, 10, 25, { label: '全部', value: -1 }]}
+                            component="div"
+                            count={nodes?.length || 0}
+                            rowsPerPage={rowsPerPage}
+                            page={page}
+                            onPageChange={handleChangePage}
+                            onRowsPerPageChange={handleChangeRowsPerPage}
+                            labelRowsPerPage="每页行数:"
+                            labelDisplayedRows={({ from, to, count }) => `第 ${from} - ${to} 行，共 ${count} 行`}
+                        />
+                    </Paper>
                 )}
             </Box>
         </Paper>
